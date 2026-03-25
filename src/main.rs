@@ -1,5 +1,6 @@
+use avian3d::prelude::{Collider, LinearVelocity, RigidBody};
 use bevy::{
-    color::palettes::css::{GREEN, RED},
+    color::palettes::css::{GREEN, WHITE},
     prelude::*,
 };
 
@@ -32,46 +33,60 @@ fn startup(
             .with_rotation(Quat::from_rotation_x(-17. / 180. * std::f32::consts::PI)),
     ));
 
+    commands.spawn(DirectionalLight {
+        color: WHITE.into(),
+        ..Default::default()
+    });
+
     commands.spawn((
-        Mesh3d(meshes.add(Plane3d::new(
-            Vec3::Y,
-            Vec2::new(41.5 / 2. * RATIO, 480. / 2. * RATIO),
-        ))),
+        Mesh3d(meshes.add(Plane3d::new(Vec3::Y, Vec2::new(1., 1.)))),
         MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: RED.into(),
+            base_color: WHITE.into(),
             ..Default::default()
         })),
-        Transform::from_translation(Vec3::new(0., 0., -240. * RATIO)),
+        RigidBody::Static,
+        Collider::cuboid(2., 0.001, 2.),
+        Transform::from_translation(Vec3::new(0., 0., -240. * RATIO)).with_scale(Vec3::new(
+            41.5 / 2. * RATIO,
+            1.0,
+            480. / 2. * RATIO,
+        )),
     ));
 
     let pin_base = (
-        Mesh3d(meshes.add(Cuboid::new(2.25 * RATIO, 15. * RATIO, 2.25 * RATIO))),
+        Mesh3d(meshes.add(Cuboid::new(1., 1., 1.))),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: GREEN.into(),
             ..Default::default()
         })),
+        RigidBody::Dynamic,
+        Collider::cuboid(1., 1., 1.),
     );
 
-    let mut pin = |x, z| {
+    for (x, z) in [
+        (0., -456.),
+        (-6., -462.),
+        (6., -462.),
+        (-12., -468.),
+        (0., -468.),
+        (12., -468.),
+        (-18., -474.),
+        (-6., -474.),
+        (6., -474.),
+        (18., -474.),
+    ] {
         commands.spawn((
             pin_base.clone(),
-            Transform::from_translation(Vec3::new(x * RATIO, 7.5 * RATIO, z * RATIO)),
+            Transform::from_translation(Vec3::new(x * RATIO, 8. * RATIO, z * RATIO))
+                .with_scale(Vec3::new(2.25 * RATIO, 15. * RATIO, 2.25 * RATIO)),
         ));
-    };
-
-    pin(0., -456.);
-    pin(-6., -462.);
-    pin(6., -462.);
-    pin(-12., -468.);
-    pin(0., -468.);
-    pin(12., -468.);
-    pin(-18., -474.);
-    pin(-6., -474.);
-    pin(6., -474.);
-    pin(18., -474.);
+    }
 
     commands.spawn((
         SceneRoot(asset_server.load("penguiBall.glb#Scene0")),
         Transform::from_translation(Vec3::new(0., 12. * RATIO, -160. * RATIO)),
+        RigidBody::Dynamic,
+        Collider::sphere(8.5 / 2. * RATIO),
+        LinearVelocity(Vec3::new(0.1, 0., -5.5)),
     ));
 }
