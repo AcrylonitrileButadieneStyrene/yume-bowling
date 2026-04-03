@@ -18,6 +18,7 @@ fn main() {
             bevy_inspector_egui::quick::WorldInspectorPlugin::default(),
         ))
         .add_systems(Startup, startup)
+        .add_systems(Update, (bind_r, bind_space))
         .run();
 }
 
@@ -87,6 +88,39 @@ fn startup(
         Transform::from_translation(Vec3::new(0., 12. * RATIO, -160. * RATIO)),
         RigidBody::Dynamic,
         Collider::sphere(8.5 / 2. * RATIO),
-        LinearVelocity(Vec3::new(0.1, 0., -5.5)),
+        BowlingBall,
     ));
+}
+
+fn bind_r(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut commands: Commands,
+    ball: Query<Entity, With<BowlingBall>>,
+) {
+    if !keys.just_pressed(KeyCode::KeyR) {
+        return;
+    }
+
+    commands
+        .entity(ball.single().unwrap())
+        .insert(Transform::from_translation(Vec3::new(
+            0.,
+            12. * RATIO,
+            -160. * RATIO,
+        )))
+        .remove::<LinearVelocity>();
+}
+
+fn bind_space(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut commands: Commands,
+    ball: Query<Entity, With<BowlingBall>>,
+) {
+    if !keys.just_pressed(KeyCode::Space) {
+        return;
+    }
+
+    commands
+        .entity(ball.single().unwrap())
+        .insert(LinearVelocity(Vec3::new(0.1, 0., -5.5)));
 }
