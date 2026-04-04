@@ -1,4 +1,4 @@
-use avian3d::prelude::{Collider, LinearVelocity, RigidBody};
+use avian3d::prelude::{AngularVelocity, Collider, LinearVelocity, RigidBody};
 use bevy::{
     color::palettes::css::{GREEN, WHITE},
     prelude::*,
@@ -8,7 +8,9 @@ use bevy::{
 pub const RATIO: f32 = 0.0254;
 
 #[derive(Component, Reflect)]
-pub struct BowlingBall;
+pub struct BowlingBall {
+    pub stationary: bool,
+}
 
 mod camera;
 
@@ -22,7 +24,7 @@ fn main() {
             camera::Plugin,
         ))
         .add_systems(Startup, startup)
-        .add_systems(Update, (bind_r, bind_space))
+        .add_systems(Update, (respawn_ball, bind_space))
         .run();
 }
 
@@ -86,39 +88,46 @@ fn startup(
         Transform::from_translation(Vec3::new(0., 12. * RATIO, -160. * RATIO)),
         RigidBody::Dynamic,
         Collider::sphere(8.5 / 2. * RATIO),
-        BowlingBall,
+        BowlingBall { stationary: true },
     ));
 }
 
-fn bind_r(
-    keys: Res<ButtonInput<KeyCode>>,
-    mut commands: Commands,
-    ball: Query<Entity, With<BowlingBall>>,
+fn respawn_ball(
+    mut ball: Query<(
+        &mut Transform,
+        &mut LinearVelocity,
+        &mut AngularVelocity,
+        &mut BowlingBall,
+    )>,
 ) {
-    if !keys.just_pressed(KeyCode::KeyR) {
+    let (mut transform, mut linear, mut angular, mut ball) = ball.single_mut().unwrap();
+    if transform.translation.y > -5. {
         return;
-    }
+    };
 
-    commands
-        .entity(ball.single().unwrap())
-        .insert(Transform::from_translation(Vec3::new(
-            0.,
-            12. * RATIO,
-            -160. * RATIO,
-        )))
-        .remove::<LinearVelocity>();
+    transform.rotation = Quat::default();
+    transform.translation = Vec3::new(0., 12. * RATIO, -160. * RATIO);
+    *linear = LinearVelocity::ZERO;
+    *angular = AngularVelocity::ZERO;
+    ball.stationary = true;
 }
 
 fn bind_space(
     keys: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
-    ball: Query<Entity, With<BowlingBall>>,
+    mut ball: Query<(Entity, &mut BowlingBall)>,
 ) {
     if !keys.just_pressed(KeyCode::Space) {
         return;
     }
 
+    let (entity, mut ball) = ball.single_mut().unwrap();
+    if !ball.stationary {
+        return;
+    }
+
+    ball.stationary = false;
     commands
-        .entity(ball.single().unwrap())
+        .entity(entity)
         .insert(LinearVelocity(Vec3::new(0.1, 0., -5.5)));
 }
