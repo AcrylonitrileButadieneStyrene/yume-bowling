@@ -8,7 +8,7 @@ pub struct Plugin;
 impl bevy::prelude::Plugin for Plugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
-            .add_systems(Update, (respawn, throw, movement));
+            .add_systems(Update, (respawn, spin, throw, movement));
     }
 }
 
@@ -47,21 +47,36 @@ fn respawn(
     ball.stationary = true;
 }
 
-fn throw(
-    keys: Res<ButtonInput<KeyCode>>,
-    mut ball: Query<(&mut BowlingBall, &mut LinearVelocity)>,
-) {
-    if !keys.just_pressed(KeyCode::Space) {
+fn spin(keys: Res<ButtonInput<KeyCode>>, mut ball: Query<(&BowlingBall, &mut AngularVelocity)>) {
+    if !keys.pressed(KeyCode::Space) {
         return;
     }
 
-    let (mut ball, mut linear) = ball.single_mut().unwrap();
+    let (ball, mut angular) = ball.single_mut().unwrap();
+    if !ball.stationary {
+        return;
+    }
+
+    angular.y += 0.1;
+}
+
+fn throw(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut ball: Query<(&mut BowlingBall, &mut LinearVelocity, &mut AngularVelocity)>,
+) {
+    if !keys.just_released(KeyCode::Space) {
+        return;
+    }
+
+    let (mut ball, mut linear, mut angular) = ball.single_mut().unwrap();
     if !ball.stationary {
         return;
     }
 
     ball.stationary = false;
     *linear = LinearVelocity(Vec3::new(0.1, 0., -5.5));
+    angular.y /= 2.;
+    angular.z = angular.y;
 }
 
 fn movement(
