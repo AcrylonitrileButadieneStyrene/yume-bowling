@@ -4,10 +4,13 @@ use bevy::{
     prelude::*,
 };
 
+// inches to meters
+pub const RATIO: f32 = 0.0254;
+
 #[derive(Component, Reflect)]
 pub struct BowlingBall;
 
-const RATIO: f32 = 0.0254;
+mod camera;
 
 fn main() {
     App::new()
@@ -16,6 +19,7 @@ fn main() {
             avian3d::PhysicsPlugins::default(),
             bevy_inspector_egui::bevy_egui::EguiPlugin::default(),
             bevy_inspector_egui::quick::WorldInspectorPlugin::default(),
+            camera::Plugin,
         ))
         .add_systems(Startup, startup)
         .add_systems(Update, (bind_r, bind_space))
@@ -28,12 +32,6 @@ fn startup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    commands.spawn((
-        Camera3d::default(),
-        Transform::from_translation(Vec3::new(0., 70. * RATIO, 0.))
-            .with_rotation(Quat::from_rotation_x(-17. / 180. * std::f32::consts::PI)),
-    ));
-
     commands.spawn(DirectionalLight {
         color: WHITE.into(),
         ..Default::default()
