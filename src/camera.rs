@@ -21,7 +21,7 @@ fn setup(mut commands: Commands) {
 
 fn update(
     mut camera: Query<&mut Transform, (With<Camera>, Without<crate::BowlingBall>)>,
-    ball: Query<&Transform, (With<super::BowlingBall>, Without<Camera>)>,
+    ball: Query<&Transform, (With<crate::BowlingBall>, Without<Camera>)>,
     time: Res<Time<Virtual>>,
 ) {
     let ball = ball.single().unwrap();
