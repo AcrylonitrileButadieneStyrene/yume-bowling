@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::WHITE, prelude::*};
 
 pub struct Plugin;
 
@@ -17,6 +17,11 @@ fn setup(mut commands: Commands) {
         Transform::from_translation(START)
             .with_rotation(Quat::from_rotation_x(-17. / 180. * std::f32::consts::PI)),
     ));
+
+    commands.spawn(DirectionalLight {
+        color: WHITE.into(),
+        ..Default::default()
+    });
 }
 
 fn update(
