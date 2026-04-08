@@ -17,6 +17,7 @@ fn main() {
         .add_plugins((
             DefaultPlugins,
             avian3d::PhysicsPlugins::default(),
+            avian3d::prelude::PhysicsDebugPlugin::default(),
             bevy_inspector_egui::bevy_egui::EguiPlugin::default(),
             bevy_inspector_egui::quick::WorldInspectorPlugin::default(),
             camera::Plugin,
@@ -30,6 +31,7 @@ fn startup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     commands.spawn(DirectionalLight {
         color: WHITE.into(),
@@ -52,13 +54,12 @@ fn startup(
     ));
 
     let pin_base = (
-        Mesh3d(meshes.add(Cuboid::new(1., 1., 1.))),
+        SceneRoot(asset_server.load("pin.glb#Scene0")),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: GREEN.into(),
             ..Default::default()
         })),
         RigidBody::Dynamic,
-        Collider::cuboid(1., 1., 1.),
     );
 
     for (x, z) in [
@@ -73,10 +74,15 @@ fn startup(
         (6., -474.),
         (18., -474.),
     ] {
-        commands.spawn((
-            pin_base.clone(),
-            Transform::from_translation(Vec3::new(x * RATIO, 8. * RATIO, z * RATIO))
-                .with_scale(Vec3::new(2.25 * RATIO, 15. * RATIO, 2.25 * RATIO)),
-        ));
+        commands
+            .spawn((
+                pin_base.clone(),
+                Transform::from_translation(Vec3::new(x * RATIO, 2. * RATIO, z * RATIO))
+                    .with_scale(Vec3::ONE * 0.0804756864),
+            ))
+            .with_child((
+                Collider::cuboid(0.73874, 4.73448, 0.73874),
+                Transform::from_translation(Vec3::new(0., 4.73448 / 2., 0.)),
+            ));
     }
 }
