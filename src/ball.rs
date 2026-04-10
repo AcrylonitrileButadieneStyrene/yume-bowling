@@ -84,8 +84,12 @@ fn movement(
     mut ball: Query<(&BowlingBall, &mut Transform)>,
     time: Res<Time<Virtual>>,
 ) {
-    let left = keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft);
-    let right = keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight);
+    let left = keys.pressed(KeyCode::KeyA)
+        || keys.pressed(KeyCode::ArrowLeft)
+        || keys.pressed(KeyCode::KeyH);
+    let right = keys.pressed(KeyCode::KeyD)
+        || keys.pressed(KeyCode::ArrowRight)
+        || keys.pressed(KeyCode::KeyL);
     let dir = left as i32 - right as i32;
     if dir == 0 {
         return;
