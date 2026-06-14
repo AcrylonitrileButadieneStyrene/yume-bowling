@@ -4,8 +4,8 @@ pub struct Plugin;
 
 impl bevy::prelude::Plugin for Plugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup)
-            .add_systems(PostUpdate, update);
+        app.add_systems(Startup, setup);
+        // .add_systems(PostUpdate, update);
     }
 }
 
@@ -14,6 +14,9 @@ const START: Vec3 = Vec3::new(0.0, 1.52, -2.0639997);
 fn setup(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
+        bevy::camera_controller::free_camera::FreeCamera {
+            ..Default::default()
+        },
         Transform::from_translation(START)
             .with_rotation(Quat::from_rotation_x(-17. / 180. * std::f32::consts::PI)),
     ));
