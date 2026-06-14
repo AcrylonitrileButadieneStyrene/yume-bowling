@@ -44,7 +44,7 @@ fn startup(
                     base_color_texture: Some(asset_server.load(format!("pins/{tex}.png"))),
                     ..Default::default()
                 })),
-                Transform::from_translation(Vec3::new(x * RATIO, 2. * RATIO, z * RATIO))
+                Transform::from_translation(Vec3::new(x * RATIO, 20. * RATIO, z * RATIO))
                     .with_scale(Vec3::ONE * MODEL_RATIO),
             ))
             .with_child((

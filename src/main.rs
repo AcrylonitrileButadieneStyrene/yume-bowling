@@ -1,14 +1,13 @@
-use avian3d::prelude::{Collider, ColliderConstructor, RigidBody};
-use bevy::{color::palettes::css::WHITE, prelude::*};
+use bevy::prelude::*;
 
 // inches to meters
 pub const RATIO: f32 = 0.0254;
 
 mod ball;
-mod camera;
 #[cfg(debug_assertions)]
 mod debug;
 mod pins;
+mod player;
 
 pub use ball::BowlingBall;
 
@@ -20,10 +19,9 @@ fn main() {
             bevy_skein::SkeinPlugin::default(),
             #[cfg(debug_assertions)]
             debug::Plugin,
-            camera::Plugin,
             ball::Plugin,
             pins::Plugin,
-            bevy::camera_controller::free_camera::FreeCameraPlugin,
+            player::Plugin,
         ))
         .add_systems(Startup, startup)
         .run();
@@ -32,7 +30,12 @@ fn main() {
 fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SceneRoot(asset_server.load("madoRoom.glb#Scene0")),
+        // 1 blender unit (meter) to 1 rpgmaker tile (3 feet)
         Transform::from_scale(Vec3::splat(0.9144)),
-        RigidBody::Static,
     ));
+
+    commands.spawn(DirectionalLight {
+        color: bevy::color::palettes::css::WHITE.into(),
+        ..Default::default()
+    });
 }
