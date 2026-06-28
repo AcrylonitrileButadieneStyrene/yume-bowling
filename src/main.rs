@@ -39,7 +39,7 @@ fn main() {
 
 fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
-        SceneRoot(asset_server.load("madoRoom.glb#Scene0")),
+        SceneRoot(asset_server.load("madoRoom/madoRoom.gltf#Scene0")),
         // 1 blender unit (meter) to 1 rpgmaker tile (3 feet)
         Transform::from_scale(Vec3::splat(0.9144)),
     ));

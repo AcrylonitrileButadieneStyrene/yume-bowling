@@ -21,7 +21,7 @@ fn startup(
     asset_server: Res<AssetServer>,
 ) {
     let pin_base = (
-        Mesh3d(asset_server.load("pin.glb#Mesh0/Primitive0")),
+        Mesh3d(asset_server.load("pins/pin.glb#Mesh0/Primitive0")),
         RigidBody::Dynamic,
     );
 
@@ -41,7 +41,7 @@ fn startup(
             .spawn((
                 pin_base.clone(),
                 MeshMaterial3d(materials.add(StandardMaterial {
-                    base_color_texture: Some(asset_server.load(format!("pins/{tex}.png"))),
+                    base_color_texture: Some(asset_server.load(format!("pins/textures/{tex}.png"))),
                     ..Default::default()
                 })),
                 Transform::from_translation(Vec3::new(x * RATIO, 20. * RATIO, z * RATIO))
