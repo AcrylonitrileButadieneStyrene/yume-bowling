@@ -1,19 +1,33 @@
-use avian3d::prelude::{Collider, LinearVelocity, LockedAxes, RigidBody};
+use avian_pickup::{
+    actor::AvianPickupActor,
+    input::{AvianPickupAction, AvianPickupInput},
+};
+use avian3d::{
+    collision::collider::{CollisionLayers, LayerMask},
+    prelude::{Collider, LinearVelocity, LockedAxes, RigidBody},
+    spatial_query::SpatialQueryFilter,
+};
 use bevy::{
     input::mouse::MouseMotion,
     prelude::*,
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
 
+pub const HEIGHT: f32 = 1.6;
+pub const EYE_HEIGHT: f32 = 1.55;
+
 pub struct Plugin;
 
 #[derive(Component)]
-struct Player;
+pub struct Player;
+
+#[derive(Component)]
+pub struct PlayerCamera;
 
 impl bevy::prelude::Plugin for Plugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
-            .add_systems(Update, (update_cursor, update_angle, update));
+            .add_systems(Update, (update_cursor, update_angle, update, handle_input));
     }
 }
 
@@ -22,13 +36,25 @@ fn setup(mut commands: Commands) {
         .spawn((
             Player,
             RigidBody::Dynamic,
-            Collider::capsule(0.2, 1.6),
+            Collider::capsule(0.2, HEIGHT),
+            CollisionLayers::new(crate::CollisionLayer::Player, LayerMask::ALL),
             LockedAxes::ROTATION_LOCKED,
             Transform::from_translation(Vec3::new(0., 1.5, 0.)),
         ))
         .with_child((
+            PlayerCamera,
             Camera3d::default(),
-            Transform::from_translation(Vec3::new(0., 0.75, 0.)),
+            Transform::from_translation(Vec3::new(0., EYE_HEIGHT - HEIGHT / 2., 0.)),
+            AvianPickupActor {
+                prop_filter: SpatialQueryFilter::from_mask(crate::CollisionLayer::Prop),
+                actor_filter: SpatialQueryFilter::from_mask(crate::CollisionLayer::Player),
+                obstacle_filter: SpatialQueryFilter::from_mask(crate::CollisionLayer::Default),
+                pull: avian_pickup::actor::AvianPickupActorPullConfig {
+                    impulse: 0.1,
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
         ));
 }
 
@@ -118,4 +144,31 @@ fn update(
     let target = Quat::from_rotation_y(yaw) * desired * 3.0;
     velocity.0.x = target.x;
     velocity.0.z = target.z;
+}
+
+fn handle_input(
+    mut avian_pickup_input_writer: MessageWriter<AvianPickupInput>,
+    key_input: Res<ButtonInput<MouseButton>>,
+    actors: Query<Entity, With<AvianPickupActor>>,
+) {
+    for actor in &actors {
+        if key_input.just_pressed(MouseButton::Left) {
+            avian_pickup_input_writer.write(AvianPickupInput {
+                action: AvianPickupAction::Throw,
+                actor,
+            });
+        }
+        if key_input.just_pressed(MouseButton::Right) {
+            avian_pickup_input_writer.write(AvianPickupInput {
+                action: AvianPickupAction::Drop,
+                actor,
+            });
+        }
+        if key_input.pressed(MouseButton::Right) {
+            avian_pickup_input_writer.write(AvianPickupInput {
+                action: AvianPickupAction::Pull,
+                actor,
+            });
+        }
+    }
 }

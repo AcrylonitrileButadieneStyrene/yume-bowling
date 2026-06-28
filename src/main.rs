@@ -1,3 +1,4 @@
+use avian3d::prelude::*;
 use bevy::prelude::*;
 
 // inches to meters
@@ -11,11 +12,20 @@ mod player;
 
 pub use ball::BowlingBall;
 
+#[derive(Debug, PhysicsLayer, Default)]
+enum CollisionLayer {
+    #[default]
+    Default,
+    Player,
+    Prop,
+}
+
 fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins,
-            avian3d::PhysicsPlugins::default(),
+            PhysicsPlugins::default(),
+            avian_pickup::AvianPickupPlugin::default(),
             bevy_skein::SkeinPlugin::default(),
             #[cfg(debug_assertions)]
             debug::Plugin,

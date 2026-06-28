@@ -413,6 +413,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "avian_pickup"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c3676d8b9b7141e8bb8d68863b40b99a0e2f575e02b068a353d180eb80d7476"
+dependencies = [
+ "avian3d",
+ "bevy_app",
+ "bevy_ecs",
+ "bevy_log",
+ "bevy_math",
+ "bevy_platform",
+ "bevy_reflect",
+ "bevy_time",
+ "bevy_transform",
+ "bevy_utils",
+ "rand",
+]
+
+[[package]]
 name = "base64"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7102,6 +7121,7 @@ name = "yume-bowling"
 version = "0.1.0"
 dependencies = [
  "avian3d",
+ "avian_pickup",
  "bevy",
  "bevy-inspector-egui",
  "bevy_skein",
